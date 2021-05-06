@@ -1,6 +1,7 @@
 package com.ypf.myweather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -76,6 +77,12 @@ public class ChooseAreaFragment extends Fragment {
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cities.get(position);
                     queryCounties();
+                } else if (currentLevel == LEVEL_COUNTY) {
+                    String weatherId = counties.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id", weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -115,7 +122,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCities() {
         titleText.setText(selectedProvince.getName());
         backButton.setVisibility(View.VISIBLE);
-        cities = DataSupport.where("provinceid= ? ", String.valueOf(selectedProvince.getId()))
+        cities = DataSupport.where("provinceId= ? ", String.valueOf(selectedProvince.getId()))
                 .find(City.class);
         if (cities.size() > 0) {
             dataList.clear();
@@ -136,7 +143,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCounties() {
         titleText.setText(selectedCity.getName());
         backButton.setVisibility(View.VISIBLE);
-        counties = DataSupport.where("cityid= ? ", String.valueOf(selectedCity.getId()))
+        counties = DataSupport.where("cityId= ? ", String.valueOf(selectedCity.getId()))
                 .find(County.class);
         if (counties.size() > 0) {
             dataList.clear();
@@ -186,17 +193,18 @@ public class ChooseAreaFragment extends Fragment {
                     });
                 }
             }
-
             @Override
             public void onFailure(Call call, IOException e) {
                 //通过runOnUiThread方法回到主线程处理逻辑
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        closeProgressDialog();
-                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                Log.d(TAG, "onFailure: " + e);
+                queryFromServer(address, type);
+//                getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        closeProgressDialog();
+//                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
             }
         });
     }
