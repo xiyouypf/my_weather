@@ -13,18 +13,24 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.ypf.myweather.db.City;
 import com.ypf.myweather.db.County;
 import com.ypf.myweather.db.Province;
+import com.ypf.myweather.db.Weather;
 import com.ypf.myweather.util.HttpUtil;
 import com.ypf.myweather.util.HandleData;
+
 import org.litepal.crud.DataSupport;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -79,10 +85,20 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY) {
                     String weatherId = counties.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weather_id", weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    if (getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    } else if (getActivity() instanceof WeatherActivity) {
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        //关闭滑动菜单
+                        activity.drawerLayout.closeDrawers();
+                        //显示下拉进度条
+                        activity.swipeRefresh.setRefreshing(true);
+                        //请求新城市的天气信息
+                        activity.requestWeather(weatherId);
+                    }
                 }
             }
         });
@@ -193,6 +209,7 @@ public class ChooseAreaFragment extends Fragment {
                     });
                 }
             }
+
             @Override
             public void onFailure(Call call, IOException e) {
                 //通过runOnUiThread方法回到主线程处理逻辑
