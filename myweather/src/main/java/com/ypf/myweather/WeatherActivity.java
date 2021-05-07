@@ -1,5 +1,6 @@
 package com.ypf.myweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -23,6 +24,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.ypf.myweather.db.Forecast;
 import com.ypf.myweather.db.Weather;
+import com.ypf.myweather.service.AutoUpdateService;
 import com.ypf.myweather.util.HandleData;
 import com.ypf.myweather.util.HttpUtil;
 
@@ -52,6 +54,7 @@ public class WeatherActivity extends AppCompatActivity {
 
     public DrawerLayout drawerLayout;
     private Button navButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,6 +151,9 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+        //开启自动更新服务
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     //根据天气id请求城市天气信息
